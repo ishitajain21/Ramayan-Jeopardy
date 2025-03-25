@@ -1,0 +1,744 @@
+<!-- make backgorund colur white  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>रामायण Jeopardy</title>
+    <style>
+        /* Previous styles remain the same */
+        body {
+            font-family: 'Noto Serif Devanagari', serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to bottom, #fefefe, #fefefe);
+            color: #4b3e17;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: #b37700;
+            font-weight: bold;
+            text-shadow: 2px 2px #ffd700;
+            border-bottom: 5px solid #b37700;
+            padding-bottom: 10px;
+        }
+
+        .team-setup {
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+            background: #ffe5b4;
+            border: 3px solid #b37700;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .team-input {
+            margin: 10px;
+            padding: 10px;
+            font-size: 1.2rem;
+            border: 2px solid #b37700;
+            border-radius: 5px;
+        }
+
+        .team-scores {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .team-score {
+            background-color: #b37700;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            min-width: 150px;
+            font-size: 1.1rem;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .active-team {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .category {
+            text-align: center;
+            font-size: 1.2rem;  /* Increased category font size */
+        }
+
+        .category-title {
+            background-color: #060CE9;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            border-radius: 5px;
+            font-size: 1rem;  /* Reduced category title font size for better fit */
+        }
+
+        .question-card {
+            background-color: #060CE9;
+            color: white;
+            height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.5rem;  /* Increased question card font size */
+        }
+
+        .question-card:hover {
+            background-color: #0509B8;
+        }
+
+        /* New style for answered questions */
+        .question-card.answered {
+            background-color: #1a1f3d;
+            cursor: not-allowed;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .question-card.answered:hover {
+            background-color: #1a1f3d;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Ensure modal is on top */
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 40px; /* Increased padding */
+            border-radius: 10px; /* Increased border-radius */
+            text-align: center;
+            max-width: 90%; /* Take up more width */
+            max-height: 90%; /* Take up more height */
+            overflow: auto; /* Enable scrolling if content is too large */
+            box-sizing: border-box; /* Include padding in width/height */
+            display: flex; /* Use flexbox for vertical centering */
+            flex-direction: column;
+            justify-content: center; /* Vertically center content */
+        }
+        .modal-content h2 {
+            font-size: 3em; /* Dynamic font size based on screen size */
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            font-size: 2em; /* Dynamic font size based on screen size */
+            line-height: 1.5; /* Improve readability */
+            margin-bottom: 30px;
+        }
+
+        /* Responsive font sizes */
+        @media (max-width: 768px) {
+            .modal-content h2 {
+                font-size: 2em;
+            }
+            .modal-content p {
+                font-size: 1.5em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content h2 {
+                font-size: 1.5em;
+            }
+            .modal-content p {
+                font-size: 1.2em;
+            }
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .scoring-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            background-color: #060CE9;
+        }
+
+        .correct {
+            background-color: #28a745;
+        }
+
+        .incorrect {
+            background-color: #dc3545;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+        const newStyles = `
+.questions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.question-card {
+    transform-origin: top;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.question-card.removing {
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+body {
+            font-family: 'Noto Serif Devanagari', serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to bottom, #fefefe, #fefefe);
+            color: #4b3e17;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: #b37700;
+            font-weight: bold;
+            text-shadow: 2px 2px #ffd700;
+            border-bottom: 5px solid #b37700;
+            padding-bottom: 10px;
+        }
+
+        .team-setup {
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+            background: #ffe5b4;
+            border: 3px solid #b37700;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .team-input {
+            margin: 10px;
+            padding: 10px;
+            font-size: 1.2rem;
+            border: 2px solid #b37700;
+            border-radius: 5px;
+        }
+
+        .team-scores {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .team-score {
+            background-color: #b37700;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            min-width: 150px;
+            font-size: 1.1rem;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .active-team {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        
+        .category-title {
+    background-color: #b37700;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+        .question-card {
+            background-color: #ffc107;
+            color: white;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .question-card:hover {
+            background-color: #b37700;
+            transform: scale(1.05);
+        }
+
+        .question-card.answered {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #ffe5b4;
+            padding: 40px;
+            border-radius: 15px;
+            border: 5px solid #b37700;
+            text-align: center;
+            max-width: 90%;
+            color: #4b3e17;
+        }
+
+        .modal-content h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #b37700;
+            text-shadow: 1px 1px #ffd700;
+        }
+
+        .modal-content p {
+            font-size: 1.5rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            background-color: #b37700;
+        }
+
+        button:hover {
+            background-color: #d4a017;
+        }
+
+        .correct {
+            background-color: #28a745;
+        }
+
+        .incorrect {
+            background-color: #dc3545;
+        }
+
+        /* Responsive font sizes */
+        @media (max-width: 768px) {
+            .header {
+                font-size: 2rem;
+            }
+            .question-card {
+                font-size: 1.2rem;
+            }
+            .modal-content h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        
+    </style>
+</head>
+<body>
+    <!-- HTML structure remains the same -->
+    <div class="header">
+        <h1>रामायण Jeopardy!</h1>
+    </div>
+
+    <div class="team-setup" id="teamSetup">
+        <h2>Team Setup</h2>
+        <div id="teamInputs">
+            <input type="text" class="team-input" placeholder="Team 1 Name">
+            <input type="text" class="team-input" placeholder="Team 2 Name">
+        </div>
+        <button onclick="addTeamInput()">Add Another Team</button>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="team-scores" id="teamScores"></div>
+    <div id="board" class="board" style="display: none;"></div>
+
+    <div class="modal" id="questionModal">
+        <div class="modal-content">
+            <h2 id="modalQuestion"></h2>
+            <p id="modalAnswer" style="display: none;"></p>
+            <button onclick="showAnswer()">Show Answer</button>
+            <div class="scoring-controls" id="scoringControls" style="display: none;">
+                <button class="correct" onclick="awardPoints(true)">Correct</button>
+                <button class="incorrect" onclick="awardPoints(false)">Incorrect</button>
+                <!-- <button onclick="closeModal()">Next Team</button> -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        
+        const gameData = {
+    categories: ['Epic Origins', 'Mythological Figures', 'Battles & Challenges', 'Sacred Locations', 'Divine Artifacts'],
+    questions: {
+        // fix the questionsa so that theuy have question in q and anbswer in a 
+        'Epic Origins': {
+            200: { q: 'This sage is credited with writing the original Ramayan', a: 'Valmiki' },
+            300: { q: 'Writer of famous retelling of Ramayan as Ramcharitmanas', a: 'Tulsidas' },
+            400: { q: 'This language was the original language of the Ramayan', a: 'Sanskrit' },
+            500: { q: 'Composure of Hanuman Chalisa', a: 'Tulsidas' },
+            600: { q: 'Dynasty of Ram and his brothers.', a: 'Raghukul, Sun dynasty' },
+            700: { q: 'The number of sections in the original Ramayan', a: '7 (Bal Kanda, Ayodhya Kanda, Aranya Kanda, Kiskindha Kanda, Sundar Kanda, Lanka Kanda, and Uttar Kanda.)' },
+            100: { q: 'Which Hindu god is Ram considered to be an avatar of?', a: 'Vishnu' },
+            800: { q: 'The Ramyana is believed to have been composed in this yuga', a: 'Treta Yuga' },
+            1000: { q: 'How Gayatri Mantra was formed from the Ramayan', a: 'from the first letter that comes from after every 1000 verses of Ramayan'},
+            900: { q: 'The total number of verses in the original Sanskrit Ramayan', a: '24,000' }
+        },
+        'Mythological Figures': {
+            100: { q: 'The main protagonist and avatar of Vishnu', a: 'Ram' },
+            700: { q: 'Sita\'s Father and mother', a:'Janak and Sunaina' },
+            200: { q: 'The monkey god who helped Ram in the Lanka war', a: 'Hanuman' },
+            300: { q: 'Ram\'s loyal brother who accompanied him in exile', a: 'Lakshman' },
+            400: { q: 'The demon king who kidnapped Sita', a: 'Ravan' },
+            500: { q: 'Ram\'s brother who ruled Ayodhya during his exile', a: 'Bharat' },
+            800: { q: 'The sage who trained Ram and Lakshman in warfare', a: 'Rishi Vishwamitra' },
+            600: { q: 'Ram\'s father, the king of Ayodhya and his mother', a: 'Dasharath and Kaushalya' },
+            900: { q: 'The monkey king who became Ram\'s ally', a: 'Sugriva' },
+            1000: { q: 'Name of Ram\'s twin sons born in the forest', a: 'Luv and Kush' }
+        },
+        'Battles & Challenges': {
+            1000: { q: 'The number of years Ram was exiled', a: '14' },
+            600: { q: 'The duration of the war with Ravan', a: '7 days' },
+            100: { q: 'Which powerful demon was awakened by Ravana to fight against Rama?', a: 'Kumbhakarn' },
+            400: { q: 'Who went with King Dasrath to fight battle against Demon Samabara and got 2 boons.', a:'Queeen Kaikeyi'},
+            700: { q: 'The divine weapon (astra) Ram used to defeat Ravan', a: 'Brahmastra' },
+            200: { q: 'The bird who tried to save Sita from Ravan', a: 'Jatayu' },
+            800: { q: 'Demon who helped Ravan to abduct Sita by disguising as golden deer', a: 'Mareech' },
+            900: { q: 'Bird who first saw Sita across the ocean and informed Hanuman' , a: 'Sampathi' },
+            300: { q: 'What did Ram do to win Sita\'s hand in marriage?', a: 'In the Swaym-var, he broke the mighty bow of Shiv' },
+            500: { q: 'Which demon disguised herself as a beautiful woman to trick Rama and Lakshmana?', a: 'Surpanakha' }
+        },
+        'Sacred Locations': {
+            100: { q: 'Ram\'s birth city', a: 'Ayodhya' },
+            200: { q: 'The golden city ruled by Ravan', a: 'Lanka' },
+            700: { q: 'The forest where Ram, Lakshamn and Sita spent their exile', a: 'Dandakaranya' },
+            300:{ q: 'In which modern-day state is Chitrakoot, where Rama spent part of his exile, located?', a: 'Madhya Pradesh' },
+            600: { q: 'Garden where Sita was held captive in Lanka', a :'Ashoka Vatika'},
+            400: { q: 'Which place is believed to be the birthplace of Goddess Sita?', a: 'Janakpur/Mithilla' },
+            800: { q: 'The mountain with healing herbs, including Sanjeevani Booti', a: 'Mount Dronagiri' },
+            900: { q: 'The ashram where Sita took refuge', a: 'Valmiki Ashram' },
+            500: { q: 'The place where Ram built the bridge to Lanka', a: 'Rameshwaram' },
+            1000: { q: 'In which city is the Triveni Sangam located, a place visited by Rama during his exile?', a: 'Prayagraj (formerly Allahabad)' }
+        },
+        'Divine Artifacts': {
+            100: { q: 'The divine bow Ram broke to win Sita', a: 'Shiva Dhanush-Pinaka' },
+            200: { q: 'The magical herbs that Hanuman bought to save Lakshamna', a: 'Sanjeevani Booti' },
+            1000: { q: 'The magical sword of Ravan, gifted by Shiva', a: 'Chandrahas' },
+            900: { q: 'The divine chariot used by Ram to return to Ayodhya, also the chariot used by Ravan', a: 'Pushpak Viman' },
+             
+            600: { q: 'What did Ram give to Hanuman to give to Sita as proof that he was coming', a: 'Ram\'s signet ring' },
+            800: { q: 'The weapon given to Lakshman by Indra', a: 'Indrastra' },
+            700: { q: 'Bharata took these as a symbol representing Ram to place it on the throne of Ayodhya and rule as Ram\'s representative.' , a: 'Charan paduka'},
+            500:{ q: 'What divine object did the vanaras use to build a bridge to Lanka?', a: 'Rama Setu (floating stones)' },
+            300: { q: 'The bridge built to cross to Lanka', a: 'Ram Setu' },
+            400: { q: 'What divine weapon did Hanuman use to set Lanka on fire?', a: 'His own tail (imbued with divine power)' }
+        }
+    }, 
+    'miscQuestions': [
+    { q: 'Son of Dasarath and Kaikai', a: 'Bharat'},
+    { q: 'How was Jambavan born according to mythology?', a: 'He emerged from Lord Brahma\'s mouth when Brahma yawned' },
+{ q: 'What unique role did Jambavan play in helping Hanuman during the search for Sita?', a: 'He motivated Hanuman and helped him realize his true capabilities' },
+{ q: 'Name of Ram\'s twin sons born in the forest', a: 'Luv and Kush' },
+{ q: 'Three wives of Dasarath', a:'Kaushalya, Sumitra, and Kaikeyi' },
+{ q: 'Hanuman\'s Father and mother', a: 'Vayu and Anjana' },
+{ q: 'River that flows near Chitrakoot where Bharat came to meet Ram', a:'River Mandakini'},
+{ q: 'Place where Ram came to know about his father King Dasratha\'s death', a:'Chitrakoot'},
+{ q: 'The magical sword of Ravan, gifted by Shiva', a: 'Chandrahas' },
+{ q: 'How were Ravan and Kumbhkarna were related to Vishnu in previous incarnation', a: 'Doorkeepers of Vaikuntha, Vishunu\'s abode' },
+{ q: 'Ravan\'s father and mother', a: 'Rishi Visharva and Kaikesi' },
+{ q: 'Lakshmana is considered to be the incarnation', a: 'Sheshnag' },
+{ q: 'The number of years Ram was exiled', a: '14' },
+{ q: 'Who drives the chariot that Ram, Lakshmana and Sita get on to leave Ayodhya and go to the forest?', a: 'Sumant'},
+{ q: 'Doctor in Ram\'s army who suggested Sanjeevani medicine for Lakshamna', a:'Sushen' },
+{ q: 'Sage Bhardwaj has built his hermitage at the confluence of these rivers.', a: 'Ganga and Yumuna (and Saraswati)'},
+{ q: 'Jatayu and Sampathi are sons of this charioteer' , a:'Arun, charioteer of sun'},
+{ q: 'Ram\'s wife who was abducted by Ravan', a: 'Sita' },
+{ q: 'Ravan\'s brothers', a:'Vibhishan (The devotee), Kumbhakaran (The giant), Khar (The king), Dhushan (The fighter), Ahiravan (The netherworld demon)' },
+{ q: 'After Ram\'s return to Ayodhya, Bharat ruled this kingdom', a: 'Nandigram' },
+{ q: 'What is the name of Bharata\'s maternal uncle that he went to visit', a: 'Ashwapati or Yudhajit'},
+{ q: 'Place where Bharat meets Ram and requests him to return to Ayodhya', a:'Chitrakoot' },
+{ q: 'Father of king Dashratha', a:'Aja' },
+{ q: 'Lakshamna\'s twin brother', a:'Shatrughana' },
+{ q: 'In which city is the Triveni Sangam located, a place visited by Rama during his exile?', a: 'Prayagraj (formerly Allahabad)' },
+{ q: 'Lakshamna\'s mother', a: 'Sumitra' },
+{ q: 'How Gayatri Mantra was formed from the Ramayan', a: 'from the first letter that comes from after every 1000 verses of Ramayan'},
+{ q: 'Lakshma was able to slay this demon\ as he had not eaten, slept, nor seen the face of a woman for 14 years', a: 'Indrajit' },
+{ q: 'Sita\'s sisters who married Ram\'s brothers', a:'Mandavi, Urmila, and Sutkirti'},
+{ q: 'Ram, Lakshmana and Sita stay on the banks of which river on the first day of leaving for the forest from Ayodhya (this is where they also left the citizens of Ayodhya and went forward)', a: 'River Tamasa'},
+{ q: 'Ayodhya was the capital of which kingdom', a:'Kosalo' } 
+]
+};
+
+        let teams = [];
+        let currentTeam = 0;
+        let currentQuestionValue = 0;
+        let currentMiscIndex = 0;
+        let currentCategory = '';
+        let answeredQuestions = new Set();
+
+        function addTeamInput() {
+            const inputs = document.getElementById('teamInputs');
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.className = 'team-input';
+            newInput.placeholder = `Team ${inputs.children.length + 1} Name`;
+            inputs.appendChild(newInput);
+        }
+
+        function startGame() {
+            const inputs = document.getElementsByClassName('team-input');
+            teams = Array.from(inputs)
+                .map(input => ({
+                    name: input.value || input.placeholder,
+                    score: 0
+                }));
+            
+            document.getElementById('teamSetup').style.display = 'none';
+            document.getElementById('board').style.display = 'grid';
+            updateTeamScores();
+            createBoard();
+        }
+
+        function updateTeamScores() {
+            const scoresDiv = document.getElementById('teamScores');
+            scoresDiv.innerHTML = '';
+            teams.forEach((team, index) => {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = `team-score ${index === currentTeam ? 'active-team' : ''}`;
+                teamDiv.innerHTML = `${team.name}<br>$${team.score}`;
+                scoresDiv.appendChild(teamDiv);
+            });
+        }
+
+        function createBoard() {
+    const board = document.getElementById('board');
+    board.innerHTML = ''; // Clear existing board
+    
+    gameData.categories.forEach(category => {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category';
+        
+        const categoryTitle = document.createElement('div');
+        categoryTitle.className = 'category-title';
+        categoryTitle.textContent = category;
+        categoryDiv.appendChild(categoryTitle);
+        
+        // Create a container for questions
+        const questionsContainer = document.createElement('div');
+        questionsContainer.className = 'questions-container';
+        questionsContainer.setAttribute('data-category', category);
+        
+        // Get all available values for this category
+        const availableValues = Object.keys(gameData.questions[category])
+            .map(Number)
+            .filter(value => !answeredQuestions.has(`${category}-${value}`))
+            .sort((a, b) => a - b)
+            .slice(0, 5); // Only show first 5 questions
+        
+        availableValues.forEach(value => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `$${value}`;
+            card.onclick = () => handleCardClick(card, category, value);
+            questionsContainer.appendChild(card);
+        });
+        
+        categoryDiv.appendChild(questionsContainer);
+        board.appendChild(categoryDiv);
+    });
+}
+
+function checkAllQuestionsAnswered() {
+    const totalQuestions = gameData.categories.reduce((total, category) => {
+        return total + Object.keys(gameData.questions[category]).length;
+    }, 0);
+    
+    return answeredQuestions.size >= totalQuestions;
+}
+
+function showMiscSection() {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    
+    // Create header for miscellaneous section
+    const header = document.createElement('div');
+    header.className = 'category-title';
+    header.style.gridColumn = '1 / -1';
+    header.style.marginBottom = '20px';
+    header.textContent = 'Bonus Round: Miscellaneous Questions (500 points each)';
+    board.appendChild(header);
+    
+    // Create container for misc questions
+    const miscContainer = document.createElement('div');
+    miscContainer.style.gridColumn = '1 / -1';
+    miscContainer.style.display = 'grid';
+    miscContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+    miscContainer.style.gap = '10px';
+    
+    // Add question cards only for unanswered questions
+    gameData.miscQuestions.forEach((question, index) => {
+        const questionId = `misc-${index}`;
+        if (!answeredQuestions.has(questionId)) {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.textContent = `Bonus Question ${index + 1}`;
+            card.onclick = () => handleMiscQuestion(index, question);
+            miscContainer.appendChild(card);
+        }
+    });
+    
+    board.appendChild(miscContainer);
+}
+function handleMiscQuestion(index, question) {
+    const questionId = `misc-${index}`;
+    if (answeredQuestions.has(questionId)) return;
+    
+    currentQuestionValue = 500; // Fixed value for misc questions
+    currentCategory = 'misc';
+    
+    // Store the current question index for use in closeModal
+    currentMiscIndex = index;
+    
+    document.getElementById('modalQuestion').textContent = question.q;
+    document.getElementById('modalAnswer').textContent = question.a;
+    document.getElementById('modalAnswer').style.display = 'none';
+    document.getElementById('scoringControls').style.display = 'none';
+    document.getElementById('questionModal').classList.add('active');
+    document.getElementById('modalQuestion').style.fontSize = '3em';
+    document.getElementById('modalAnswer').style.fontSize = '2em';
+}
+
+function handleCardClick(card, category, value) {
+    const questionId = `${category}-${value}`;
+    if (answeredQuestions.has(questionId)) return;
+    
+    currentQuestionValue = value;
+    currentCategory = category;
+    const question = gameData.questions[category][value];
+    
+    document.getElementById('modalQuestion').textContent = question.q;
+    document.getElementById('modalAnswer').textContent = question.a;
+    document.getElementById('modalAnswer').style.display = 'none';
+    document.getElementById('scoringControls').style.display = 'none';
+    document.getElementById('questionModal').classList.add('active');
+    document.getElementById('modalQuestion').style.fontSize = '3em'
+            document.getElementById('modalAnswer').style.fontSize = '2em'
+            document.getElementById('questionModal').classList.add('active');
+}
+
+        function showAnswer() {
+            document.getElementById('modalAnswer').style.display = 'block';
+            document.getElementById('scoringControls').style.display = 'flex';
+        }
+
+        function awardPoints(correct) {
+            const points = correct ? currentQuestionValue : -currentQuestionValue;
+            teams[currentTeam].score += points;
+            currentTeam = (currentTeam + 1) % teams.length;
+            updateTeamScores();
+            closeModal();
+        }
+
+        function closeModal() {
+    if (currentCategory === 'misc') {
+        // Use the stored misc index to mark the question as answered
+        answeredQuestions.add(`misc-${currentMiscIndex}`);
+        showMiscSection(); // Refresh misc questions display
+    } else {
+        const questionId = `${currentCategory}-${currentQuestionValue}`;
+        answeredQuestions.add(questionId);
+        
+        if (checkAllQuestionsAnswered()) {
+            showMiscSection();
+        } else {
+            createBoard();
+        }
+    }
+    
+    document.getElementById('questionModal').classList.remove('active');
+    document.getElementById('modalQuestion').style.fontSize = '';
+    document.getElementById('modalAnswer').style.fontSize = '';
+}
+
+    </script>
+</body>
+</html>
